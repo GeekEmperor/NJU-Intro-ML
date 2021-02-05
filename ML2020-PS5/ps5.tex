@@ -1,0 +1,282 @@
+\documentclass[a4paper,UTF8]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{color}
+\usepackage{ctex}
+\usepackage{enumerate}
+\usepackage[margin=1.25in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage{pythonhighlight}
+
+\theoremstyle{definition}
+\newtheorem*{solution}{Solution}
+\newtheorem*{prove}{Proof}
+\usepackage{multirow}              
+
+\setlength{\evensidemargin}{.25in}
+\setlength{\textwidth}{6in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\topmargin}{-0.5in}
+% \setlength{\textheight}{9.5in}
+%%%%%%%%%%%%%%%%%%此处用于设置页眉页脚%%%%%%%%%%%%%%%%%%
+\usepackage{fancyhdr}                                
+\usepackage{lastpage}                                           
+\usepackage{layout}                                             
+\footskip = 12pt 
+\pagestyle{fancy}                    % 设置页眉                 
+\lhead{2020年春季}                    
+\chead{机器学习导论}                                                
+% \rhead{第\thepage/\pageref{LastPage}页} 
+\rhead{作业五}                                                                                               
+\cfoot{\thepage}                                                
+\renewcommand{\headrulewidth}{1pt}  			%页眉线宽，设为0可以去页眉线
+\setlength{\skip\footins}{0.5cm}    			%脚注与正文的距离           
+\renewcommand{\footrulewidth}{0pt}  			%页脚线宽，设为0可以去页脚线
+
+\makeatletter 									%设置双线页眉                                        
+\def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi%
+		\hrule\@height 1.0pt \@width\headwidth\vskip1pt	%上面线为1pt粗  
+		\hrule\@height 0.5pt\@width\headwidth  			%下面0.5pt粗            
+		\vskip-2\headrulewidth\vskip-1pt}      			%两条线的距离1pt        
+	\vspace{6mm}}     								%双线与下面正文之间的垂直间距              
+\makeatother  
+
+%--
+
+%--
+\begin{document}
+\title{机器学习导论\\习题五}
+\author{171830635, 俞星凯, yuxk@smail.nju.edu.cn}
+\maketitle
+
+
+\section*{学术诚信}
+
+本课程非常重视学术诚信规范，助教老师和助教同学将不遗余力地维护作业中的学术诚信规范的建立。希望所有选课学生能够对此予以重视。\footnote{参考尹一通老师\href{http://tcs.nju.edu.cn/wiki/}{高级算法课程}中对学术诚信的说明。}
+
+\begin{tcolorbox}
+	\begin{enumerate}
+		\item[(1)] 允许同学之间的相互讨论，但是{\color{red}\textbf{署你名字的工作必须由你完成}}，不允许直接照搬任何已有的材料，必须独立完成作业的书写过程;
+		\item[(2)] 在完成作业过程中，对他人工作（出版物、互联网资料）中文本的直接照搬（包括原文的直接复制粘贴及语句的简单修改等）都将视为剽窃，剽窃者成绩将被取消。{\color{red}\textbf{对于完成作业中有关键作用的公开资料，应予以明显引用}}；
+		\item[(3)] 如果发现作业之间高度相似将被判定为互相抄袭行为，{\color{red}\textbf{抄袭和被抄袭双方的成绩都将被取消}}。因此请主动防止自己的作业被他人抄袭。
+	\end{enumerate}
+\end{tcolorbox}
+
+\section*{作业提交注意事项}
+\begin{tcolorbox}
+	\begin{enumerate}
+		\item[(1)] 请在LaTeX模板中{\color{red}\textbf{第一页填写个人的姓名、学号、邮箱信息}}；
+		\item[(2)] 本次作业需提交该pdf文件、问题4可直接运行的源码(学号\_.py)、问题4的输出文件(学号\_ypred.csv)，将以上三个文件压缩成zip文件后上传。zip文件格式为{\color{red}\textbf{学号.zip}}，例如170000001.zip；pdf文件格式为{\color{red}\textbf{学号\_姓名.pdf}}，例如170000001\_张三.pdf。
+		\item[(3)] 未按照要求提交作业，或提交作业格式不正确，将会{\color{red}\textbf{被扣除部分作业分数}}；
+		\item[(4)] 本次作业提交截止时间为{\color{red}\textbf{6月5日23:59:59}}。除非有特殊情况（如因病缓交），否则截止时间后不接收作业，本次作业记零分。
+	\end{enumerate}
+\end{tcolorbox}
+
+\newpage
+
+\section*{\textbf{[35 pts]} Problem 1 [PCA]}
+
+\begin{enumerate}[(1)]\item \textbf{[5 pts]}简要分析为什么主成分分析具有数据降噪能力;
+	\item \textbf{[10 pts]} 试证明对于N个样本（样本维度D>N）组成的数据集，主成分分析的有效投影子空间不超过N-1维;
+	\item \textbf{[20 pts]} 对以下样本数据进行主成分分析，将其降到一行，要求写出其详细计算过程。
+\begin{equation}
+	X=
+ \left[
+ \begin{array}{cccccc}
+     2 & 3 & 3 &4 &5 &7 \\
+    2 &4 &5 &5 &6 &8 \\
+ \end{array}
+ \right]        
+ \end{equation}
+	
+	
+\end{enumerate}
+
+\begin{solution}
+	~\\
+	\begin{enumerate}[(1)]
+		\item 
+		在较小特征值对应的特征向量方向上，数据的变化较小，可以认为这些轻微变化是由噪声引起，PCA舍弃这些方向可以完成数据降噪。
+		\item 
+		考虑$X=(x_1,x_2,\cdots,x_N) \in \mathbb{R}^{D \times N}$，中心化得到$\hat{X}=(x_1-\bar{x},x_2-\bar{x},\cdots,x_N-\bar{x})$，显然$\sum_{i=1}^N(x_i-\bar{x})=\textbf{0}$，即$\hat{X}$的列线性相关，$rank(\hat{X})\leq\min(D,N)-1=N-1$，因此$rank(\hat{X}\hat{X}^T)\leq N-1$，PCA有效投影子空间不超过$N-1$维。
+		\item 
+		中心化
+		\[\hat{X}=\left[
+		\begin{array}{cccccc}
+		-2 & -1 & -1 & 0 & 1 & 3\\
+		-3 & -1 &  0 & 0 & 1 & 3\\
+		\end{array}
+		\right]\]
+		计算协方差矩阵
+		\[\hat{X}\hat{X}^T=\left[
+		\begin{array}{cc}
+		16 & 17\\
+		17 & 20\\
+		\end{array}
+		\right]\]
+		求解特征方程
+		\[0=\vert\lambda E-\hat{X}\hat{X}^T\vert=\lambda^2-36\lambda+31\]
+		得到特征值
+		\[\lambda=35.1172,\ 0.8828\]
+		第一个特征向量
+		\[w=\left[
+		\begin{array}{c}
+		0.6645\\
+		0.7473\\
+		\end{array}
+		\right]\]
+		降维之后数据
+		\[w^T\hat{X}=\left[
+		\begin{array}{cccccc}
+		-3.5709 & -1.4118 & -0.6645 & 0 & 1.4118 & 4.2354\\
+		\end{array}
+		\right]\]
+	\end{enumerate}
+\end{solution}
+
+\section*{[20 pts] Problem 3 [KNN]}
+已知$err=1-\sum_{c \in Y}P^2(c|x)$
+，$err*=1-max_{c \in Y}P(c|x)$分别表示最近邻分类器与贝叶斯最优分类器的期望错误率，其中Y为类别总数，请证明：\begin{equation*}err^* \leq err \leq err^*(2-\frac{|Y|}{|Y|-1}*err^*)\end{equation*}
+
+\begin{solution}
+	~\\
+	令$c^*=\arg\max_{c \in Y}P(c|x)$
+	\begin{align*}
+		err&=1-\sum_{c \in Y}P^2(c|x)\\
+		&\geq 1-\sum_{c \in Y}[P(c|x)P(c^*|x)]\\
+		&=1-P(c^*|x)\sum_{c \in Y}P(c|x)\\
+		&=1-P(c^*|x)\\
+		&=err^*
+	\end{align*}
+	不等式左边得证。\\
+	利用柯西不等式
+	\begin{align*}
+		err&=1-\sum_{c \in Y}P^2(c|x)\\
+		&=1-P^2(c^*|x)-\sum_{c \in Y,c \neq c^*}P^2(c|x)\\
+		&\leq 1-P^2(c^*|x)-\frac{[\sum_{c \in Y,c \neq c^*}P(c|x)]^2}{|Y|-1}\\
+		&=1-P^2(c^*|x)-\frac{[1-P(c^*|x)]^2}{|Y|-1}\\
+		&=(1-P(c^*|x))\left(1+P(c^*|x)-\frac{1-P(c^*|x)}{|Y|-1}\right)\\
+		&=err^*(2-err^*-\frac{err^*}{|Y|-1})\\
+		&=err^*(2-\frac{|Y|}{|Y|-1} \times err^*)
+	\end{align*}
+	不等式右边得证。
+\end{solution}
+\newpage
+
+\section*
+{[25 pts] Problem 2 [Naive Bayes Classifier]}
+通过对课本的学习，我们了解了采用“属性条件独立性假设”的朴素贝叶斯分类器。现在我们有如下表所示的一个数据集，其中$x_1$与$x_2$为特征，其取值集合分别为$x_1=\{-1,0,1\}$，$x_2=\{B,M,S\}$，y为类别标记，其取值集合为$y=\{0,1\}$：
+	\begin{table}[htp]
+		\centering
+		\caption{数据集}\label{tab:aStrangeTable}
+	\begin{tabular}{cccccccccccccccc}
+		\hline 
+	编号	& $1$ & $2$ & $3$ & $4$ & $5$ & $6$ & $7$ & $8$ & $9$ & $10$ & $11$ & $12$ & $13$ & $14$ & $15$\\ 
+		\hline 
+	$x_1$	& -1 & -1 & -1 & -1 & -1 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 \\ 
+		\hline 
+	$x_2$	& $B$ &$M$ &$M$ &$B$ &$B$ &$B$ &$M$ &$M$ &$S$ &$S$ &$S$ &$M$ &$M$ &$S$ &$S$  \\ 
+		\hline 
+	$y$	& 0 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 0 \\ 
+		\hline 
+	\end{tabular}
+	\end{table} 
+	
+	\begin{enumerate}[(1)]
+	    \item \textbf{[5pts]}通过查表直接给出的$x=\{0,B\}$的类别；
+		\item \textbf{[10pts]} 使用所给训练数据，学习一个朴素贝叶斯试分类器，并确定$x=\{0,B\}$的标记，要求写出详细计算过程；
+		\item \textbf{[10pts]} 使用“拉普拉斯修正”，即取$\lambda$=1，再重新计算$x=\{0,B\}$的标记，要求写出详细计算过程。
+	\end{enumerate}
+	
+\begin{solution}
+	~\\
+	\begin{enumerate}[(1)]
+		\item 
+		表中6号数据$x=\{0,B\}$，类别为0。
+		\item 
+		\begin{gather*}
+		p(y=0)=\frac{6}{15},\ p(y=1)=\frac{9}{15}\\
+		p(x_1=-1|y=0)=\frac{3}{6},\ p(x_1=0|y=0)=\frac{2}{6},\ p(x_1=1|y=0)=\frac{1}{6}\\
+		p(x_2=B|y=0)=\frac{3}{6},\ p(x_2=M|y=0)=\frac{2}{6},\ p(x_2=S|y=0)=\frac{1}{6}\\
+		p(x_1=-1|y=1)=\frac{2}{9},\ p(x_1=0|y=1)=\frac{3}{9},\ p(x_1=1|y=1)=\frac{4}{9}\\
+		p(x_2=B|y=1)=\frac{1}{9},\ p(x_2=M|y=1)=\frac{4}{9},\ p(x_2=S|y=1)=\frac{4}{9}
+		\end{gather*}
+		由此得出
+		\begin{gather*}
+		p(y=0)p(x_1=0,x_2=B|y=0)=p(y=0)p(x_1=0|y=0)p(x_2=B|y=0)=\frac{6}{15}\times\frac{2}{6}\times\frac{3}{6}=\frac{1}{15}\\
+		p(y=1)p(x_1=0,x_2=B|y=1)=p(y=1)p(x_1=0|y=1)p(x_2=B|y=1)=\frac{9}{15}\times\frac{3}{9}\times\frac{1}{9}=\frac{1}{45}
+		\end{gather*}
+		前者大于后者，标记为0。
+		\item 
+		\begin{gather*}
+		p(y=0)=\frac{7}{17},\ p(y=1)=\frac{10}{17}\\
+		p(x_1=-1|y=0)=\frac{4}{9},\ p(x_1=0|y=0)=\frac{3}{9},\ p(x_1=1|y=0)=\frac{2}{9}\\
+		p(x_2=B|y=0)=\frac{4}{9},\ p(x_2=M|y=0)=\frac{3}{9},\ p(x_2=S|y=0)=\frac{2}{9}\\
+		p(x_1=-1|y=1)=\frac{3}{12},\ p(x_1=0|y=1)=\frac{4}{12},\ p(x_1=1|y=1)=\frac{5}{12}\\
+		p(x_2=B|y=1)=\frac{2}{12},\ p(x_2=M|y=1)=\frac{5}{12},\ p(x_2=S|y=1)=\frac{5}{12}
+		\end{gather*}
+		由此得出
+		\begin{gather*}
+		p(y=0)p(x_1=0|y=0)p(x_2=B|y=0)=\frac{7}{17}\times\frac{3}{9}\times\frac{4}{9}=\frac{28}{459}=0.0610\\
+		p(y=1)p(x_1=0|y=1)p(x_2=B|y=1)=\frac{10}{17}\times\frac{4}{12}\times\frac{2}{12}=\frac{5}{153}=0.0327
+		\end{gather*}
+		前者大于后者，标记为0。
+	\end{enumerate}
+\end{solution}
+
+	
+
+
+
+
+\section*{[20 pts] Problem 4 [KNN in Practice]}
+
+\par 
+\begin{enumerate}[(1)]
+	\item \textbf{[20 pts]} 结合编程题指南，实现KNN算法。
+
+\end{enumerate}
+
+\begin{solution}
+	~\\
+	KNN是机器学习中最简单的模型之一，这里使用Python和Numpy库实现一个KNN类，用来解决一个分类问题。\\
+	首先KNN类的构造函数需要指定$k$。
+\begin{python}
+class KNN():
+	def __init__(self, k=5):
+		self.k = k
+\end{python}
+	其次定义函数计算测试样例到训练集的距离。
+\begin{python}
+def distance(self, one_sample, X_train):
+	return np.sum(np.square(X_train - one_sample), 1)		
+\end{python}
+	然后定义函数获取$k$个近邻的标签。
+\begin{python}
+def get_k_neighbor_labels(self, distances, y_train):
+	return y_train[np.argsort(distances)[:self.k]]
+\end{python}
+	接着完成单个测试样例的预测，调用上面二者并选择票数最多的标签。
+\begin{python}
+def vote(self, one_sample, X_train, y_train):
+	distances = self.distance(one_sample, X_train)
+	labels = self.get_k_neighbor_labels(distances, y_train)
+	labels = list(labels)
+	return max(set(labels), key=labels.count)
+\end{python}
+	最后对测试集的预测可以通过循环调用上者得到。
+\begin{python}
+def predict(self, X_test, X_train, y_train):
+	n = X_test.shape[0]
+	y_pred = np.zeros(n)
+	for i in range(n):
+		y_pred[i] = self.vote(X_test[i], X_train, y_train)
+	return y_pred	
+\end{python}
+\end{solution}
+
+\end{document}
